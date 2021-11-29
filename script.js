@@ -793,9 +793,24 @@ function builderFunction()
     */
 
     var sqlFileName = "formMaker.sql";
-    var sqlContents = "";
+    var sqlContents = "CREATE DATABASE IF NOT EXISTS Answers; USE Answers; DROP TABLE IF EXISTS answersTable; CREATE TABLE answersTable( email VARCHAR(100) PRIMARY KEY,";
 
     // do stuff here to build the string for the sql file 
+    var formString = "";
+    var questionTotal = 1;
 
-    // download(sqlFileName, sqlContents);  // build and download the sql file
+    for (let i = 0; i < elementArr.length; i++) {
+        if (elementArr[i].indexOf('type') > -1) {
+            formString += " question";
+            formString += questionTotal;
+            questionTotal += 1;
+            formString += " VARCHAR(100),";
+        }
+    }
+
+    sqlContents += formString;
+    sqlContents = sqlContents.slice(0, -1);
+    sqlContents += ");"
+
+    download(sqlFileName, sqlContents);  // build and download the sql file
 }
