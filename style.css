@@ -1,0 +1,217 @@
+:root {
+    --border-color: #e3e5e4;
+    --background-color: #c3c7ca;
+    --text-color: #3444f;
+}
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Lato', Arial, Helvetica, sans-serif;
+}
+
+.draggable-list {
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 0;
+    list-style-type: none;
+    width: 50%;
+}
+
+.draggable-list li {
+    background-color: white;
+    display: flex;
+    flex: 1;
+}
+
+.draggable-list li:not(:last-of-type) {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.draggable-list .number {
+    background-color: var(--background-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    height: 60px;
+    width: 60px;
+}
+
+.draggable-list li.over .draggable {
+    background-color: #eaeaea;
+}
+
+.draggable-list .objTab {
+    margin: 0 20px 0 0;
+}
+
+.draggable {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    flex: 1;
+}
+
+.check-btn {
+    background-color: var(--background-color);
+    border:none;
+    color: var(--text-color);
+    font-size: 16px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.check-btn:active {
+    transform: scale(0.96);
+}
+
+.check-btn:focus {
+    outline: none;
+}
+
+.edit {
+    background-color: teal;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#dropper {
+    background-color: #f44336;
+}
+
+table, th, td {
+    border: 1px solid black;
+    padding: 10px;
+}
+
+.adder {
+    width: 50px;
+    height:50px;
+    border-radius: 50%;
+    font-size: 10px;
+    border: none;
+    color: white;
+    background: orange; 
+    padding: 0px;
+    text-align:center;
+}
+
+.adder:hover {
+    cursor: pointer;
+    color: var(--text-color);
+}
+
+.adder:active {
+    transform: scale(0.96);
+}
+
+/*.tableElement {
+	background: none;
+	color: inherit;
+	border: none;
+	padding: 0;
+	font: inherit;
+	cursor: pointer;
+	outline: inherit; 
+}
+
+.tableElement:hover {
+    cursor: pointer; 
+}*/
+
+/* styling the popup form to add an element */
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+  
+  /* Modal Content */
+  .modal-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 80%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    -webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.4s;
+    animation-name: animatetop;
+    animation-duration: 0.4s
+  }
+  
+  /* Add Animation */
+  @-webkit-keyframes animatetop {
+    from {top:-300px; opacity:0} 
+    to {top:0; opacity:1}
+  }
+  
+  @keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+  }
+  
+  /* The Close Button */
+  .close {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  
+  .modal-header {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+  }
+  
+  .modal-body {padding: 2px 16px;}
+  
+  .modal-footer {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+  }
+
+  #addButton {
+    width: 25px;
+    height:25px;
+    border-radius: 50%;
+    font-size: 20px;
+    border: none;
+    color: white;
+    background: orange; 
+    padding: 0px;
+    text-align:center;
+    cursor: pointer;
+  }
