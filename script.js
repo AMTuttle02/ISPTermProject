@@ -812,5 +812,7 @@ function builderFunction()
     sqlContents = sqlContents.slice(0, -1);
     sqlContents += ");"
 
+    alert(sqlContents);
+
     download(sqlFileName, sqlContents);  // build and download the sql file
 }
