@@ -786,21 +786,20 @@ function builderFunction()
     /*
         - Create a table that will contain answers of the user's questions
         - Easiest way to do this is to create an array containing objects of each element of the elementArr. To build the sql database with this file, parse through that array and add lines of sql that can hold each question
-        - possibly create a table of users that the admin can upload with a CSV file to define a table of 'authorizedUsers'
         - Challenges:
             ~ How to hold the information for 'checkbox' style questions that can have up to 4 selections
             ~ Converting the elements array to a table format
     */
 
     var sqlFileName = "formMaker.sql";
-    var sqlContents = "CREATE DATABASE IF NOT EXISTS Answers; USE Answers; DROP TABLE IF EXISTS answersTable; CREATE TABLE answersTable( email VARCHAR(100) PRIMARY KEY,";
+    var sqlContents = "CREATE DATABASE IF NOT EXISTS Answers; USE Answers; DROP TABLE IF EXISTS answers_Table; CREATE TABLE answers_Table( email VARCHAR(100) PRIMARY KEY,";
 
-    // do stuff here to build the string for the sql file 
-    var formString = "";
-    var questionTotal = 1;
+    var formString = ""; // holds table rows
+    var questionTotal = 1; // used for total number of questions on form
 
+    // traverses element array to add total amount of rows needed for each question
     for (let i = 0; i < elementArr.length; i++) {
-        if (elementArr[i].indexOf('type') > -1) {
+        if (elementArr[i].indexOf('type') > -1) { // if there is a question
             formString += " question";
             formString += questionTotal;
             questionTotal += 1;
@@ -812,5 +811,107 @@ function builderFunction()
     sqlContents = sqlContents.slice(0, -1);
     sqlContents += ");"
 
+    alert(sqlContents); // alert user of file contents
+
     download(sqlFileName, sqlContents);  // build and download the sql file
+}
+
+/*
+ * Create a table of users that the admin can upload with a CSV file to define a table of 'authorizedUsers'
+*/
+var csvParsedArray = "";
+$(document).on('click', '#btnUploadFile', function () { // Runs on click of upload button
+    if ($("#fileToUpload").get(0).files.length == 0) { // no file uploaded
+        alert("Please upload the file first.");
+        return;
+    }
+    let fileUpload = $("#fileToUpload").get(0);
+    let files = fileUpload.files;
+    if (files[0].name.toLowerCase().lastIndexOf(".csv") == -1) { // incorrect file type
+        alert("Please upload only CSV files");
+        return;
+    }
+    let reader = new FileReader();
+    let bytes = 50000;
+    reader.onloadend = function (evt) { // find necessary values in file
+        let lines = evt.target.result;
+        if (lines && lines.length > 0) {
+            let line_array = CSVToArray(lines);
+            if (lines.length == bytes) {
+                line_array = line_array.splice(0, line_array.length - 1);
+            }
+            var columnArray = [];
+            for (let i = 0; i < line_array.length; i++) {
+                let cellArr = line_array[i];
+                for (var j = 0; j < cellArr.length; j++) {
+                    if (i == 0) {
+                        columnArray.push(cellArr[j].replace('﻿', ''));
+                    }
+                    else {
+                        csvParsedArray += cellArr[j] + " ";
+                    }
+                }
+            }
+        }
+
+        // Create sql file
+        var sqlFileName = "authorizedUsers.sql";
+        var sqlContents = "CREATE DATABASE IF NOT EXISTS Answers; USE Answers; DROP TABLE IF EXISTS authorized_Users; CREATE TABLE authorized_Users(username VARCHAR(100), email VARCHAR(100) PRIMARY KEY); INSERT INTO authorized_Users VALUES ";
+        
+        var formString = "";
+        var username = "";
+        var email = "";
+        var i = 0;
+        while (csvParsedArray.indexOf(' ') != -1) { // continues until all values have been added to query
+            // username
+            let x = csvParsedArray.indexOf(' '); 
+            username = csvParsedArray.substr(0, x);
+            csvParsedArray = csvParsedArray.substr(x + 1);
+
+            // email
+            x = csvParsedArray.indexOf(' ');
+            email = csvParsedArray.substr(0, x);
+            csvParsedArray = csvParsedArray.substr(x + 1);
+
+            // end row
+            formString += "('" + username + "', '" + email + "'), ";
+        }
+        sqlContents += formString;
+        sqlContents = sqlContents.slice(0, -2);
+        sqlContents += ";"
+
+        alert(sqlContents); // show user file contents
+
+        download(sqlFileName, sqlContents);  // build and download the sql file
+    }
+    let blob = files[0].slice(0, bytes);
+    reader.readAsBinaryString(blob);
+});
+
+function CSVToArray(strData, strDelimiter) { // performs conversion from csv file to readable data
+    strDelimiter = (strDelimiter || ",");
+    let objPattern = new RegExp(
+        (
+            "(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
+            "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+            "([^\"\\" + strDelimiter + "\\r\\n]*))"
+        ),
+        "gi"
+    );
+    let arrData = [[]];
+    let arrMatches = null;
+    while (arrMatches = objPattern.exec(strData)) {
+        let strMatchedDelimiter = arrMatches[1];
+        let strMatchedValue = [];
+        if (strMatchedDelimiter.length && (strMatchedDelimiter != strDelimiter)) {
+            arrData.push([]);
+        }
+        if (arrMatches[2]) {
+            strMatchedValue = arrMatches[2].replace(new RegExp("\"\"", "g"), "\"");
+        } else {
+            strMatchedValue = arrMatches[3];
+        }
+        arrData[arrData.length - 1].push(strMatchedValue);
+    }
+    return (arrData);
 }
