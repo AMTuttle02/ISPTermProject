@@ -2,6 +2,13 @@ const draggable_list = document.getElementById('draggable-list');
 const check = document.getElementById('check');
 var globalStyle = "";
 
+// global counting variables that get incremented when form elements are generated, so they
+// can be specially marked by PHP
+// question count 
+questionCount = 0; 
+// form element count 
+formElementCount = 0;
+
 // array of elements in correct order
 const elementArr = [
     `<h1 id="header">Heading</h1>`,
@@ -636,17 +643,22 @@ function gotRows() {
     } else {
         // radio button or checkbox code here
         // create the markup from those elements
-        markup = `<form> ${questionTitle}`;
-
+        //markup = `<form> ${questionTitle}`;
+        
+        questionCount += 1; 
+        markup = `<label name=question${questionCount}> ${questionTitle} </label> `;
+        
         for(var i = 0; i < options.length; i++)
         {
             if(options[i] != "")
             {
-                markup +=  `<br> <input type="${formType}" value="${options[i]}" name="option">${options[i]}`;
+                formElementCount += 1;
+                markup +=  `<br> <input type="${formType}" id=q${questionCount}-option${formElementCount} name=q${questionCount}-option${formElementCount} value="${options[i]}">${options[i]}`;
             }
         }
         // closing form tags
-        markup += `<br> </form>`;
+        //markup += `<br> </form>`;
+        markup += `<br>`;
     }
 
     // checking
