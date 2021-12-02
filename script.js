@@ -13,8 +13,11 @@ formElementCount = 0;
 const elementArr = [
     `<h1 id="header">Heading</h1>`,
     `<p id="texty">Description</p>`,
+    
     `<button>Submit</button>`
 ];
+
+//`<br><input type="text" id="email" name="email" placeholder="your_email"><br>`,
 
 // array of elements maintaining the original order
 const XelementArr = [

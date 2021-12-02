@@ -32,7 +32,6 @@ function get_question($key)
     return $extractedQuestion;
 }
 
-/*
 $clientHost = "localhost";
 $clientUsrName = "root";
 $clientPassWord = "";
@@ -41,7 +40,6 @@ $clientDBname = "Answers";
 $tableName = "answers_Table";
 
 $conn = mysqli_connect($clientHost, $clientUsrName, $clientPassWord,$clientDBname);
-*/
 
 $email = "";
 
