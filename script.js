@@ -842,6 +842,7 @@ function builderFunction()
      */
     firstDigitIndex = 0; 
     closingIndex = 0;
+    extractedNumber = ""; // variable for storing the number we extract from the string
     for (let i = 0; i < elementArr.length; i++) {
         if (elementArr[i].indexOf('type') > -1) { // if there is a question
             formString += " question";
@@ -856,8 +857,13 @@ function builderFunction()
             // we can start my taking a substring and then moving on
             // the -5 and +5 are offsets so we ignore the first <br> we must add them in after
             closingIndex = elementArr[i].substr(5,elementArr[i].length -5).search(">") + 5;
-            // find all digit between
-            
+            // find all digits between
+            for(let j = firstDigitIndex; j < closingIndex; j++)
+            {
+                extractedNumber += elementArr[i][j];
+            }
+            window.alert(extractedNumber);
+            extractedNumber = ""; // reset our extracted number
         }
     }
 
