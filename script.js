@@ -578,9 +578,11 @@ function addFormElm(type) {
         var formy = document.getElementById("getUserForm");
         formy.style.visibility = "visible";
     } else if(type == 'textbox') {
+        questionCount += 1;
+        formElementCount += 1;
         let yourPrompt = prompt("Enter the prompt for your text box");
         //let markup = "<p>" + yourPrompt + "</p>" + '<input type="text" id="TextBox" name="TextBox">';
-        let markup =   `<p>${yourPrompt}</p> <input type="text" id="TextBox" name="TextBox">`;
+        let markup =   `<br><label name=question${questionCount}>${yourPrompt}</label><br> <input type="text" id=q${questionCount}-option${formElementCount} name=q${questionCount}-option${formElementCount}>`;
         addTab(markup);
     } else if(type == 'radioButtons') {
         // function call to get the user input for the radio buttons
@@ -588,12 +590,16 @@ function addFormElm(type) {
         formy.style.visibility = "visible";
     } else if(type == 'datebox') {
         //alert(type);
+        questionCount += 1;
+        formElementCount += 1;
         let yourPrompt = prompt("Enter the prompt for the date field");
-        let markup = `<br><label for="start"><p>${yourPrompt}</p></label> <input type="date" id="start" name="date">`;
+        let markup = `<br><label name=question${questionCount}>${yourPrompt}</label><br> <input type="date" id=q${questionCount}-option${formElementCount} name=q${questionCount}-option${formElementCount}>`;
         addTab(markup);
     } else if(type == 'number') {
+        questionCount += 1;
+        formElementCount += 1;
         let yourPrompt = prompt("Enter your number prompt");
-        let markup = `<p>${yourPrompt}</p> <input id="number" type="number">`;
+        let markup = `<br><label name=question${questionCount}>${yourPrompt}</label><br><input type="number" id=q${questionCount}-option${formElementCount} name=q${questionCount}-option${formElementCount}>`;
         addTab(markup);
     }
     scrollTop();
@@ -625,15 +631,20 @@ function gotRows() {
 
     if(formType == "select")
     {
-        
+        questionCount += 1;
+
         // drop down code here 
-        markup = `<br>${questionTitle}<br><select>`;
+        markup = `<br><label name=question${questionCount}> ${questionTitle} </label><br>`;
+        markup += `<select name="q${questionCount}" id="q${questionCount}">`
         //alert(markup);
         for(var i = 0; i < options.length; i++)
         {
             if(options[i] != "")
             {
-                markup += `<option value="${i}" name="option">${options[i]}</option>`;
+                formElementCount += 1;
+                //markup += `<option value="${i}" name="option">${options[i]}</option>`;
+                markup += `<option id=q${questionCount}-option${formElementCount} name=q${questionCount}-option${formElementCount} value="${options[i]}">${options[i]}</option>`
+
             }
         }
 
@@ -646,7 +657,7 @@ function gotRows() {
         //markup = `<form> ${questionTitle}`;
         
         questionCount += 1; 
-        markup = `<label name=question${questionCount}> ${questionTitle} </label> `;
+        markup = `<br><label name=question${questionCount}> ${questionTitle} </label> `;
         
         for(var i = 0; i < options.length; i++)
         {
