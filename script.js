@@ -632,10 +632,9 @@ function gotRows() {
     if(formType == "select")
     {
         questionCount += 1;
-
         // drop down code here 
         markup = `<br><label name=question${questionCount}> ${questionTitle} </label><br>`;
-        markup += `<select name="q${questionCount}" id="q${questionCount}">`
+        markup += `<select name="question${questionCount}-" id="question${questionCount}-">`
         //alert(markup);
         for(var i = 0; i < options.length; i++)
         {
@@ -643,7 +642,7 @@ function gotRows() {
             {
                 formElementCount += 1;
                 //markup += `<option value="${i}" name="option">${options[i]}</option>`;
-                markup += `<option id=q${questionCount}-option${formElementCount} name=q${questionCount}-option${formElementCount} value="${options[i]}">${options[i]}</option>`
+                markup += `<option id=question${questionCount}-option${formElementCount} name=question${questionCount}-option${formElementCount} value="${options[i]}">${options[i]}</option>`
 
             }
         }
@@ -666,11 +665,11 @@ function gotRows() {
                 formElementCount += 1;
                 if(formType == "radio")
                 {
-                    markup +=  `<br> <input type="${formType}" id=q${questionCount}-option${formElementCount} name=q${questionCount} value="${options[i]}">${options[i]}`;
+                    markup +=  `<br> <input type="${formType}" id=question${questionCount}-option${formElementCount} name=question${questionCount}-option${formElementCount} value="${options[i]}">${options[i]}`;
                 }
                 else
                 {
-                    markup +=  `<br> <input type="${formType}" id=q${questionCount}-option${formElementCount} name=q${questionCount} value="${options[i]}">${options[i]}`;
+                    markup +=  `<br> <input type="${formType}" id=question${questionCount}-option${formElementCount} name=question${questionCount}-option${formElementCount} value="${options[i]}">${options[i]}`;
                 }
             }
         }

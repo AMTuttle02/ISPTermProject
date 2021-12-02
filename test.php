@@ -22,33 +22,49 @@ $conn = mysqli_connect($clientHost, $clientUsrName, $clientPassWord,$clientDBnam
 */
 
 $extractedQuestion = "";
+$previousExtractedQuestion = "";
+$extractedKey = "";
 $firstIndex = 0;
 $lastIndex = 0;
+
+$valueArray = array(); //("hello, goodbye, pudding,", "cats, dogs, frogs", "sheep, cows, turkey")
+
+$sqlCols = "";
+$sqlValString = "";
+
 foreach ($_POST as $key => $value) 
 {
-    echo "Field ".htmlspecialchars($key)." is ".htmlspecialchars($value)."<br>";
     
-    // get question from post request
-    //$firstIndex = strpos(htmlspecialchars($key),"question" + 8);
+
     $firstIndex = strpos(strval($key),strval("question")) + 8;
-    //$lastIndex = strpos(htmlspecialchars($key),"-");
     $lastIndex = strpos(strval($key),strval("-"));
-    echo $firstIndex . "hi" . $lastIndex . "<br>";
+
     $extractedQuestion = "question";
-    /*
+    
     for($i = $firstIndex; $i < $lastIndex; $i++)
     {
         $extractedQuestion = $extractedQuestion . htmlspecialchars($key)[$i];
     }
-    */
-    //echo $extractedQuestion;
-    // get key 
-
-    // generate query 
-
-    // cram into SQL 
-
-    // repeat
-
+    
+    $extractedKey = strval($value);
+    //echo $extractedKey;
+    // detect if 
+    if($previousExtractedQuestion != $extractedQuestion)
+    {
+        $sqlValString = $sqlValString.$extractedKey.",";
+        //$valueArray.push($sqlValString);
+        array_push($valueArray, $sqlValString);
+        $sqlValString = "";
+        $sqlCols = $sqlCols.strval($extractedQuestion).","; // add question to the stack
+        $previousExtractedQuestion = $extractedQuestion;
+    }
+    else 
+    {
+        $sqlValString = $sqlValString.$extractedKey.",";
+        //echo $sqlValString;
+    }
 }
+
+
+
 ?>
