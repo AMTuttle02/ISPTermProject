@@ -582,7 +582,7 @@ function addFormElm(type) {
         formElementCount += 1;
         let yourPrompt = prompt("Enter the prompt for your text box");
         //let markup = "<p>" + yourPrompt + "</p>" + '<input type="text" id="TextBox" name="TextBox">';
-        let markup =   `<br><label name=question${questionCount}>${yourPrompt}</label><br> <input type="text" id=q${questionCount}-option${formElementCount} name=q${questionCount}-option${formElementCount}>`;
+        let markup =   `<br><label name=question${questionCount}>${yourPrompt}</label><br> <input type="text" id=question${questionCount}-option${formElementCount} name=question${questionCount}-option${formElementCount}>`;
         addTab(markup);
     } else if(type == 'radioButtons') {
         // function call to get the user input for the radio buttons
@@ -593,13 +593,13 @@ function addFormElm(type) {
         questionCount += 1;
         formElementCount += 1;
         let yourPrompt = prompt("Enter the prompt for the date field");
-        let markup = `<br><label name=question${questionCount}>${yourPrompt}</label><br> <input type="date" id=q${questionCount}-option${formElementCount} name=q${questionCount}-option${formElementCount}>`;
+        let markup = `<br><label name=question${questionCount}>${yourPrompt}</label><br> <input type="date" id=question${questionCount}-option${formElementCount} name=question${questionCount}-option${formElementCount}>`;
         addTab(markup);
     } else if(type == 'number') {
         questionCount += 1;
         formElementCount += 1;
         let yourPrompt = prompt("Enter your number prompt");
-        let markup = `<br><label name=question${questionCount}>${yourPrompt}</label><br><input type="number" id=q${questionCount}-option${formElementCount} name=q${questionCount}-option${formElementCount}>`;
+        let markup = `<br><label name=question${questionCount}>${yourPrompt}</label><br><input type="number" id=question${questionCount}-option${formElementCount} name=question${questionCount}-option${formElementCount}>`;
         addTab(markup);
     }
     scrollTop();
@@ -777,34 +777,13 @@ function builderFunction()
                     </body>
                     </html>`;
 
-    //download(htmlFileName, htmlContents);   // build and download the html file
+    download(htmlFileName, htmlContents);   // build and download the html file
 
 
 
 
 
-    /****************************************************************************************************************************************************************************************************************/
-    /* Build the PHP File for the form
-    /****************************************************************************************************************************************************************************************************************/
-    /*
-        - get the database info from the user so that a connection can be made to the client's DB of choice
-        - Function to handle when a form is submitted by a user
-            ~ Collect the info from the form <- this is the main thing
-            ~ Use that info to build an sql query to add the info to answersTable
-            ~ Execute the sql query
-    */
-    var phpFileName = "formMaker.php";      // name of the php file
-    var phpFileContents = "";               // string will contain the entire text for the php document 
 
-    // get info about the port, username, password, and dbname from the user
-    let clientHost = "";
-    let clientUsrName = "";
-    let clientpassWord = "";
-    let clientDBname = "";
-
-    // connect to that db 
-
-    // download(phpFileName, phpContents);  // build and download the php file
 
 
 
@@ -840,15 +819,13 @@ function builderFunction()
      * this will let us easily match post request returns to questions, and jam the information in as we loop through post requests
      *
      */
+    var questionArray = new Array();
     firstDigitIndex = 0; 
     closingIndex = 0;
     extractedNumber = ""; // variable for storing the number we extract from the string
     for (let i = 0; i < elementArr.length; i++) {
         if (elementArr[i].indexOf('type') > -1) { // if there is a question
             formString += " question";
-            formString += questionTotal;
-            questionTotal += 1;
-            formString += " VARCHAR(100),";            
             //window.alert(elementArr[i][elementArr[i].search("question") + 8]);
             // find first digit in the string 
             firstDigitIndex = elementArr[i].search("question") + 8;
@@ -862,7 +839,11 @@ function builderFunction()
             {
                 extractedNumber += elementArr[i][j];
             }
-            window.alert(extractedNumber);
+            
+            formString += extractedNumber;
+            questionArray.push("question" +extractedNumber);
+            formString += " VARCHAR(100),";            
+
             extractedNumber = ""; // reset our extracted number
         }
     }
@@ -873,7 +854,7 @@ function builderFunction()
 
     alert(sqlContents); // alert user of file contents
 
-    //download(sqlFileName, sqlContents);  // build and download the sql file
+    download(sqlFileName, sqlContents);  // build and download the sql file
 }
 
 /*
@@ -975,3 +956,26 @@ function CSVToArray(strData, strDelimiter) { // performs conversion from csv fil
     }
     return (arrData);
 }
+
+    /****************************************************************************************************************************************************************************************************************/
+    /* Build the PHP File for the form
+    /****************************************************************************************************************************************************************************************************************/
+    /*
+        - get the database info from the user so that a connection can be made to the client's DB of choice
+        - Function to handle when a form is submitted by a user
+            ~ Collect the info from the form <- this is the main thing
+            ~ Use that info to build an sql query to add the info to answersTable
+            ~ Execute the sql query
+    */
+            var phpFileName = "formMaker.php";      // name of the php file
+            var phpFileContents = "";               // string will contain the entire text for the php document 
+        
+            // get info about the port, username, password, and dbname from the user
+            let clientHost = "";
+            let clientUsrName = "";
+            let clientpassWord = "";
+            let clientDBname = "";
+        
+            // connect to that db 
+        
+            // download(phpFileName, phpContents);  // build and download the php file
