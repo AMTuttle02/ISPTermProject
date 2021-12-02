@@ -777,7 +777,7 @@ function builderFunction()
                     </body>
                     </html>`;
 
-    download(htmlFileName, htmlContents);   // build and download the html file
+    //download(htmlFileName, htmlContents);   // build and download the html file
 
 
 
@@ -828,12 +828,36 @@ function builderFunction()
     var questionTotal = 1; // used for total number of questions on form
 
     // traverses element array to add total amount of rows needed for each question
+    
+    
+    /*
+     * when making a question bank, we want the question number to match up with the question in the element array
+     * this is done by searching for the keyword "question" and then moving up until we find the number  
+     *
+     * since the passed string will be the same every time, we know the "question" followed by the number will be in the same place every time
+     * even if a user tries to put in malicious information
+     * 
+     * this will let us easily match post request returns to questions, and jam the information in as we loop through post requests
+     *
+     */
+    firstDigitIndex = 0; 
+    closingIndex = 0;
     for (let i = 0; i < elementArr.length; i++) {
         if (elementArr[i].indexOf('type') > -1) { // if there is a question
             formString += " question";
             formString += questionTotal;
             questionTotal += 1;
-            formString += " VARCHAR(100),";
+            formString += " VARCHAR(100),";            
+            //window.alert(elementArr[i][elementArr[i].search("question") + 8]);
+            // find first digit in the string 
+            firstDigitIndex = elementArr[i].search("question") + 8;
+
+            // find the second > since we start our labels with <br>, we need to find the second > because it signals the end of the string
+            // we can start my taking a substring and then moving on
+            // the -5 and +5 are offsets so we ignore the first <br> we must add them in after
+            closingIndex = elementArr[i].substr(5,elementArr[i].length -5).search(">") + 5;
+            // find all digit between
+            
         }
     }
 
@@ -843,7 +867,7 @@ function builderFunction()
 
     alert(sqlContents); // alert user of file contents
 
-    download(sqlFileName, sqlContents);  // build and download the sql file
+    //download(sqlFileName, sqlContents);  // build and download the sql file
 }
 
 /*
