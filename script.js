@@ -664,7 +664,14 @@ function gotRows() {
             if(options[i] != "")
             {
                 formElementCount += 1;
-                markup +=  `<br> <input type="${formType}" id=q${questionCount}-option${formElementCount} name=q${questionCount}-option${formElementCount} value="${options[i]}">${options[i]}`;
+                if(formType == "radio")
+                {
+                    markup +=  `<br> <input type="${formType}" id=q${questionCount}-option${formElementCount} name=q${questionCount} value="${options[i]}">${options[i]}`;
+                }
+                else
+                {
+                    markup +=  `<br> <input type="${formType}" id=q${questionCount}-option${formElementCount} name=q${questionCount} value="${options[i]}">${options[i]}`;
+                }
             }
         }
         // closing form tags
