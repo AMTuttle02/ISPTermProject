@@ -769,7 +769,7 @@ function builderFunction()
     htmlContents = `<html lang="eng">
                         <title>${formName}</title>
                         <body>
-                        <form method="post" action="test.php">`;
+                        <form method="post" action="index.php">`;
 
     // add all the form elements to contents string
     htmlContents += formString;
