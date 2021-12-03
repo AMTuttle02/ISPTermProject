@@ -13,7 +13,7 @@ formElementCount = 0;
 const elementArr = [
     `<h1 id="header">Heading</h1>`,
     `<p id="texty">Description</p>`,
-    
+    `<br><input type="text" id="email" name="email" placeholder="your_email"><br>`,
     `<button>Submit</button>`
 ];
 
@@ -51,7 +51,7 @@ function createList() {
             listItem.innerHTML = `
                 <div class="draggable" draggable="true">
                     <div id="buttons">
-                        <button class="edit" onclick="editTab(${index})"> Edit </button>
+                        <!--<button class="edit" onclick="editTab(${index})"> Edit </button>-->
                         <button class="edit" id="dropper" onclick="dropTab(${index})"> Delete </button>
                     </div>
                     ${obj}
@@ -779,7 +779,7 @@ function builderFunction()
                     </body>
                     </html>`;
 
-    download(htmlFileName, htmlContents);   // build and download the html file
+    //download(htmlFileName, htmlContents);   // build and download the html file
 
 
 
@@ -827,6 +827,8 @@ function builderFunction()
     extractedNumber = ""; // variable for storing the number we extract from the string
     for (let i = 0; i < elementArr.length; i++) {
         if (elementArr[i].indexOf('type') > -1) { // if there is a question
+            
+            window.alert(elementArr[i]);
             formString += " question";
             //window.alert(elementArr[i][elementArr[i].search("question") + 8]);
             // find first digit in the string 
@@ -856,7 +858,7 @@ function builderFunction()
 
     alert(sqlContents); // alert user of file contents
 
-    download(sqlFileName, sqlContents);  // build and download the sql file
+    //download(sqlFileName, sqlContents);  // build and download the sql file
 }
 
 /*
