@@ -779,7 +779,7 @@ function builderFunction()
                     </body>
                     </html>`;
 
-    //download(htmlFileName, htmlContents);   // build and download the html file
+    download(htmlFileName, htmlContents);   // build and download the html file
 
 
 
@@ -830,7 +830,6 @@ function builderFunction()
         // if there is a question
         if (elementArr[i].indexOf('type') > -1) 
         { 
-            
             // email will be in the same place every time- indexy 27
             if(elementArr[i].search("email") == 27)
             {
@@ -839,7 +838,7 @@ function builderFunction()
             else
             {
                 formString += " question";
-                //window.alert(elementArr[i][elementArr[i].search("question") + 8]);
+
                 // find first digit in the string 
                 firstDigitIndex = elementArr[i].search("question") + 8;
 
@@ -867,8 +866,7 @@ function builderFunction()
     sqlContents += ");"
     
     alert(sqlContents); // alert user of file contents
-
-    //download(sqlFileName, sqlContents);  // build and download the sql file
+    download(sqlFileName, sqlContents);  // build and download the sql file
 }
 
 /*

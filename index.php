@@ -1,4 +1,5 @@
 <?php
+$b = "<br>"; // so I don't have to keep typing it out 
 // note, could use hidden fields to get the question information if needed
 
 // prints out an associative array
@@ -35,28 +36,31 @@ function get_question($key)
 function generate_query($array, $email, $tableName)
 {
     $valueString = ""; // string of values we put into SQL 
-    $columnString = ""; // string of cols we put into SQL
+    $columnString = "email,"; // string of cols we put into SQL
     foreach($array as $key => $value)
     {
         $valueString = $valueString."\"".$value."\"".",";
-        $columnString = $columnString.$key;
+        $columnString = $columnString.$key.",";
     }
     $valueString = substr($valueString, 0, -1); // remove last comma
+    $columnString = substr($columnString, 0, -1);
 
-    return "INSERT INTO $tableName VALUES (\"$email\", $valueString)";
+    return "INSERT INTO $tableName ($columnString) VALUES (\"$email\", $valueString)";
 }
 
-// finds the "email" tag and skips over it for our loops to stay concurrent
-function skip_email()
+// returns true if email is in the key, and false if not 
+function is_email($key)
 {
-
+    if(strval($key)=="email")
+    {
+        return true;
+    }
+    else 
+    {
+        return false;
+    }
 }
 
-// finds position of email tag plus the signifying bracket
-function find_email()
-{
-
-}
 $clientHost = "localhost";
 $clientUsrName = "root";
 $clientPassWord = "";
@@ -78,43 +82,59 @@ $sqlData = array();
 // exit if the user didn't input an email
 
 
+
+
 // loop through each post request and get names of questions, possibly email in a bit 
 // this is to begin building an associative array of questions and emails, to create an SQL query
 foreach ($_POST as $key => $value) 
 {
-    echo $key."<br>";
-    $extractedQuestion = get_question($key);
-
-    // detect if we change question forms
-    if($previousExtractedQuestion != $extractedQuestion)
+    if(!is_email($key))
     {
-        $sqlData[strval($extractedQuestion)] = "";
-        $previousExtractedQuestion = $extractedQuestion;
+        $extractedQuestion = get_question($key);
+        
+        // detect if we change question forms
+        if($previousExtractedQuestion != $extractedQuestion)
+        {
+            $sqlData[strval($extractedQuestion)] = "";
+            $previousExtractedQuestion = $extractedQuestion;
+        }
+    }
+    else 
+    {
+        $email = $value;
     }
 }
+
 
 // now we simply match questions to their respective portion of the associative array, 
 // and build it into a string that will later be inserted into sql
 foreach ($_POST as $key => $value) 
 {
-    $extractedQuestion = get_question($key);
-    $extractedKey = strval($value);
+    if(!is_email($key))
+    {
+        $extractedQuestion = get_question($key);
+        $extractedKey = strval($value);
 
-    // put commas in for the SQL string
-    $sqlData[$extractedQuestion] = $sqlData[$extractedQuestion].$extractedKey.",";
+        // put commas in for the SQL string
+        $sqlData[$extractedQuestion] = $sqlData[$extractedQuestion].$extractedKey.",";
+    }
 }
 
 // now we remove the comma from the end of each associative array string, so we can simply drop
 // the data into SQL  
 foreach ($sqlData as $key => $value)
 {
-    $sqlData[$key] = substr($sqlData[$key], 0, -1);
+    if(!is_email($key))
+    {
+        $sqlData[$key] = substr($sqlData[$key], 0, -1);
+    }
 }
 
 
 //print_assoc($sqlData);
-echo generate_query($sqlData, $email, $tableName);
+$query = generate_query($sqlData, $email, $tableName);
 
+$result = mysqli_query($conn, $query);
 
 
 
