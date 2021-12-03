@@ -67,6 +67,8 @@ $clientPassWord = "";
 $clientDBname = "Answers";
 
 $tableName = "answers_Table";
+$emailTableName = "authorized_Users";
+
 
 $conn = mysqli_connect($clientHost, $clientUsrName, $clientPassWord,$clientDBname);
 
@@ -79,7 +81,6 @@ $extractedKey = "";
 
 $sqlData = array();
 
-// exit if the user didn't input an email
 
 
 
@@ -105,6 +106,17 @@ foreach ($_POST as $key => $value)
     }
 }
 
+
+// exit if the user didn't input a valid email
+$query = "SELECT * FROM $emailTableName WHERE email = \"$email\"";
+
+$result = mysqli_query($conn, $query);
+
+// if we don't have a valid email, nothing will return from query
+if(mysqli_num_rows($result) ==0)
+{
+    exit("You do not have authorization to upload information");
+}
 
 // now we simply match questions to their respective portion of the associative array, 
 // and build it into a string that will later be inserted into sql
@@ -135,6 +147,7 @@ foreach ($sqlData as $key => $value)
 $query = generate_query($sqlData, $email, $tableName);
 
 $result = mysqli_query($conn, $query);
+
 
 
 

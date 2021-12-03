@@ -668,7 +668,7 @@ function gotRows() {
                 formElementCount += 1;
                 if(formType == "radio")
                 {
-                    markup +=  `<br> <input type="${formType}" id=question${questionCount}-option${formElementCount} name=question${questionCount}-option${formElementCount} value="${options[i]}">${options[i]}`;
+                    markup +=  `<br> <input type="${formType}" id=question${questionCount}-option name=question${questionCount}-option value="${options[i]}">${options[i]}`;
                 }
                 else
                 {
