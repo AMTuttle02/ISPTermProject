@@ -825,37 +825,47 @@ function builderFunction()
     firstDigitIndex = 0; 
     closingIndex = 0;
     extractedNumber = ""; // variable for storing the number we extract from the string
-    for (let i = 0; i < elementArr.length; i++) {
-        if (elementArr[i].indexOf('type') > -1) { // if there is a question
+    for (let i = 0; i < elementArr.length; i++) 
+    {
+        // if there is a question
+        if (elementArr[i].indexOf('type') > -1) 
+        { 
             
-            window.alert(elementArr[i]);
-            formString += " question";
-            //window.alert(elementArr[i][elementArr[i].search("question") + 8]);
-            // find first digit in the string 
-            firstDigitIndex = elementArr[i].search("question") + 8;
-
-            // find the second > since we start our labels with <br>, we need to find the second > because it signals the end of the string
-            // we can start my taking a substring and then moving on
-            // the -5 and +5 are offsets so we ignore the first <br> we must add them in after
-            closingIndex = elementArr[i].substr(5,elementArr[i].length -5).search(">") + 5;
-            // find all digits between
-            for(let j = firstDigitIndex; j < closingIndex; j++)
+            // email will be in the same place every time- indexy 27
+            if(elementArr[i].search("email") == 27)
             {
-                extractedNumber += elementArr[i][j];
+                // do nothing so we don't mess up the sql generation
             }
-            
-            formString += extractedNumber;
-            questionArray.push("question" +extractedNumber);
-            formString += " VARCHAR(100),";            
+            else
+            {
+                formString += " question";
+                //window.alert(elementArr[i][elementArr[i].search("question") + 8]);
+                // find first digit in the string 
+                firstDigitIndex = elementArr[i].search("question") + 8;
 
-            extractedNumber = ""; // reset our extracted number
+                // find the second > since we start our labels with <br>, we need to find the second > because it signals the end of the string
+                // we can start my taking a substring and then moving on
+                // the -5 and +5 are offsets so we ignore the first <br> we must add them in after
+                closingIndex = elementArr[i].substr(5,elementArr[i].length -5).search(">") + 5;
+                // find all digits between
+                for(let j = firstDigitIndex; j < closingIndex; j++)
+                {
+                    extractedNumber += elementArr[i][j];
+                }
+
+                formString += extractedNumber;
+                questionArray.push("question" +extractedNumber);
+                formString += " VARCHAR(100),";            
+
+                extractedNumber = ""; // reset our extracted number
+            }
         }
     }
 
     sqlContents += formString;
     sqlContents = sqlContents.slice(0, -1);
     sqlContents += ");"
-
+    
     alert(sqlContents); // alert user of file contents
 
     //download(sqlFileName, sqlContents);  // build and download the sql file
