@@ -898,15 +898,8 @@ function builderFunction()
 
     download(htmlFileName, htmlContents);   // build and download the html file
 
-
-    /*
-        And here is where the majik happens
-    */
-
     var useLocalHost = confirm("Would you like to build this application for local host?");
     
-
-
 
 
 
@@ -1339,80 +1332,74 @@ function builderFunction()
 /*
  * Create a table of users that the admin can upload with a CSV file to define a table of 'authorizedUsers'
 */
-
 var csvParsedArray = "";
-$(document).on('click', '#btnUploadFile', () => {
-        if ($("#fileToUpload").get(0).files.length == 0) { // no file uploaded
-            alert("Please upload the file first.");
-            return;
-        }
-        let fileUpload = $("#fileToUpload").get(0);
-        let files = fileUpload.files;
-        if (files[0].name.toLowerCase().lastIndexOf(".csv") == -1) { // incorrect file type
-            alert("Please upload only CSV files");
-            return;
-        }
-        let reader = new FileReader();
-        let bytes = 50000;
-        reader.onloadend = function (evt) {
-            let lines = evt.target.result;
-            if (lines && lines.length > 0) {
-                let line_array = CSVToArray(lines);
-                if (lines.length == bytes) {
-                    line_array = line_array.splice(0, line_array.length - 1);
-                }
-                var columnArray = [];
-                for (let i = 0; i < line_array.length; i++) {
-                    let cellArr = line_array[i];
-                    for (var j = 0; j < cellArr.length; j++) {
-                        if (i == 0) {
-                            columnArray.push(cellArr[j].replace('﻿', ''));
-                        }
-                        else {
-                            csvParsedArray += cellArr[j] + " ";
-                        }
+$(document).on('click', '#btnUploadFile', function () { // Runs on click of upload button
+    if ($("#fileToUpload").get(0).files.length == 0) { // no file uploaded
+        alert("Please upload the file first.");
+        return;
+    }
+    let fileUpload = $("#fileToUpload").get(0);
+    let files = fileUpload.files;
+    if (files[0].name.toLowerCase().lastIndexOf(".csv") == -1) { // incorrect file type
+        alert("Please upload only CSV files");
+        return;
+    }
+    let reader = new FileReader();
+    let bytes = 50000;
+    reader.onloadend = function (evt) { // find necessary values in file
+        let lines = evt.target.result;
+        if (lines && lines.length > 0) {
+            let line_array = CSVToArray(lines);
+            if (lines.length == bytes) {
+                line_array = line_array.splice(0, line_array.length - 1);
+            }
+            var columnArray = [];
+            for (let i = 0; i < line_array.length; i++) {
+                let cellArr = line_array[i];
+                for (var j = 0; j < cellArr.length; j++) {
+                    if (i == 0) {
+                        columnArray.push(cellArr[j].replace('﻿', ''));
+                    }
+                    else {
+                        csvParsedArray += cellArr[j] + " ";
                     }
                 }
             }
+        }
 
-            // Create sql file
-            var sqlFileName = "authorizedUsers.sql";
+        // Create sql file
+        var sqlFileName = "authorizedUsers.sql";
+        var sqlContents = "CREATE DATABASE IF NOT EXISTS Answers; USE Answers; DROP TABLE IF EXISTS authorized_Users; CREATE TABLE authorized_Users(username VARCHAR(100), email VARCHAR(100) PRIMARY KEY); INSERT INTO authorized_Users VALUES ";
+        
+        var formString = "";
+        var username = "";
+        var email = "";
+        var i = 0;
+        while (csvParsedArray.indexOf(' ') != -1) { // continues until all values have been added to query
+            // username
+            let x = csvParsedArray.indexOf(' '); 
+            username = csvParsedArray.substr(0, x);
+            csvParsedArray = csvParsedArray.substr(x + 1);
 
-            if (useLocalHost == true) {
-                var sqlContents = "CREATE DATABASE IF NOT EXISTS Answers; USE Answers; DROP TABLE IF EXISTS authorized_Users; CREATE TABLE authorized_Users(username VARCHAR(100), email VARCHAR(100) PRIMARY KEY); INSERT INTO authorized_Users VALUES ";
-            } else {
-                var sqlContents = "DROP TABLE IF EXISTS authorized_Users; CREATE TABLE authorized_Users(username VARCHAR(100), email VARCHAR(100) PRIMARY KEY); INSERT INTO authorized_Users VALUES ";
-            }
+            // email
+            x = csvParsedArray.indexOf(' ');
+            email = csvParsedArray.substr(0, x);
+            csvParsedArray = csvParsedArray.substr(x + 1);
 
-            var formString = "";
-            var username = "";
-            var email = "";
-            var i = 0;
-            while (csvParsedArray.indexOf(' ') != -1) { // continues until all values have been added to query
-                // username
-                let x = csvParsedArray.indexOf(' ');
-                username = csvParsedArray.substr(0, x);
-                csvParsedArray = csvParsedArray.substr(x + 1);
+            // end row
+            formString += "('" + username + "', '" + email + "'), ";
+        }
+        sqlContents += formString;
+        sqlContents = sqlContents.slice(0, -2);
+        sqlContents += ";"
 
-                // email
-                x = csvParsedArray.indexOf(' ');
-                email = csvParsedArray.substr(0, x);
-                csvParsedArray = csvParsedArray.substr(x + 1);
+        alert(sqlContents); // show user file contents
 
-                // end row
-                formString += "('" + username + "', '" + email + "'), ";
-            }
-            sqlContents += formString;
-            sqlContents = sqlContents.slice(0, -2);
-            sqlContents += ";";
-
-            alert(sqlContents); // show user file contents
-
-            download(sqlFileName, sqlContents); // build and download the sql file
-        };
-        let blob = files[0].slice(0, bytes);
-        reader.readAsBinaryString(blob);
-    });
+        download(sqlFileName, sqlContents);  // build and download the sql file
+    }
+    let blob = files[0].slice(0, bytes);
+    reader.readAsBinaryString(blob);
+});
 
 function CSVToArray(strData, strDelimiter) { // performs conversion from csv file to readable data
     strDelimiter = (strDelimiter || ",");
@@ -1441,3 +1428,26 @@ function CSVToArray(strData, strDelimiter) { // performs conversion from csv fil
     }
     return (arrData);
 }
+
+    /****************************************************************************************************************************************************************************************************************/
+    /* Build the PHP File for the form
+    /****************************************************************************************************************************************************************************************************************/
+    /*
+        - get the database info from the user so that a connection can be made to the client's DB of choice
+        - Function to handle when a form is submitted by a user
+            ~ Collect the info from the form <- this is the main thing
+            ~ Use that info to build an sql query to add the info to answersTable
+            ~ Execute the sql query
+    */
+            var phpFileName = "formMaker.php";      // name of the php file
+            var phpFileContents = "";               // string will contain the entire text for the php document 
+        
+            // get info about the port, username, password, and dbname from the user
+            let clientHost = "";
+            let clientUsrName = "";
+            let clientpassWord = "";
+            let clientDBname = "";
+        
+            // connect to that db 
+        
+            // download(phpFileName, phpContents);  // build and download the php file
