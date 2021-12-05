@@ -826,6 +826,23 @@ function download(filename, text) {
     document.body.removeChild(element);
 }
 
+function getHelp()
+{
+var turnOff = false;
+// this will display the help prompt
+// Get the modal
+var modal = document.getElementById("myModal");
+
+// show the help message
+modal.style.display = "block";
+}
+
+function hideHelp()
+{
+    var modal = document.getElementById("myModal");
+    modal.style.display = "none";
+}
+
 /*
     This function wil use the array of elements that the user created with drag and drop form generator to create .html, .php, and .sql files
     that they can use to build their four tier web application
@@ -861,7 +878,7 @@ function builderFunction()
         formString += elementArr[i];
     }
 
-    alert(formString);
+    //alert(formString);
 
     var htmlFileName = "formMaker.html";
 
@@ -882,7 +899,12 @@ function builderFunction()
     download(htmlFileName, htmlContents);   // build and download the html file
 
 
+    /*
+        And here is where the majik happens
+    */
 
+    var useLocalHost = confirm("Would you like to build this application for local host?");
+    
 
 
 
@@ -903,7 +925,13 @@ function builderFunction()
     */
 
     var sqlFileName = "formMaker.sql";
-    var sqlContents = "CREATE DATABASE IF NOT EXISTS Answers; USE Answers; DROP TABLE IF EXISTS answers_Table; CREATE TABLE answers_Table( email VARCHAR(100) PRIMARY KEY,";
+    if(useLocalHost == true)
+    {
+        var sqlContents = "CREATE DATABASE IF NOT EXISTS Answers; USE Answers; DROP TABLE IF EXISTS answers_Table; CREATE TABLE answers_Table( email VARCHAR(100) PRIMARY KEY,";
+    } else {
+        // user wants to use their own database, so don't create a database
+        var sqlContents = "DROP TABLE IF EXISTS answers_Table; CREATE TABLE answers_Table( email VARCHAR(100) PRIMARY KEY,";
+    }
 
     var formString = ""; // holds table rows
     var questionTotal = 1; // used for total number of questions on form
@@ -967,79 +995,424 @@ function builderFunction()
     
     alert(sqlContents); // alert user of file contents
     download(sqlFileName, sqlContents);  // build and download the sql file
+
+    /****************************************************************************************************************************************************************************************************************/
+    /* Build the PHP File for the form
+    /****************************************************************************************************************************************************************************************************************/
+    /*
+        - get the database info from the user so that a connection can be made to the client's DB of choice
+        - Function to handle when a form is submitted by a user
+            ~ Collect the info from the form <- this is the main thing
+            ~ Use that info to build an sql query to add the info to answersTable
+            ~ Execute the sql query
+    */
+            var phpFileName = "index.php";             // name of the php file
+            var phpFileContents = "";               // string will contain the entire text for the php document 
+
+            if(useLocalHost == true)
+            {
+                // simple, use the index.php file
+                phpContents = `<?php
+                $b = "<br>"; // so I don't have to keep typing it out 
+                // note, could use hidden fields to get the question information if needed
+                
+                // prints out an associative array
+                function print_assoc($array)
+                {
+                   foreach ($array as $key => $value) 
+                   {
+                       echo "Key: $key; Value: $value"."<br>";
+                   }
+                }
+                
+                // pass this $key from a post request coming from script.js. Will be formatted as questionXXX-
+                // will return the question plus all digits associated with it
+                function get_question($key)
+                {
+                    $firstIndex = 0;
+                    $lastIndex = 0;
+                
+                    $extractedQuestion = "question";
+                    $questionNumber = "";
+                
+                    // get the question number
+                    $firstIndex = strpos(strval($key),strval("question")) + 8;
+                    $lastIndex = strpos(strval($key),strval("-"));
+                    
+                    for($i = $firstIndex; $i < $lastIndex; $i++)
+                    {
+                        $extractedQuestion = $extractedQuestion . htmlspecialchars($key)[$i];
+                    }
+                
+                    return $extractedQuestion;
+                }
+                
+                function generate_query($array, $email, $tableName)
+                {
+                    $valueString = ""; // string of values we put into SQL 
+                    $columnString = "email,"; // string of cols we put into SQL
+                    foreach($array as $key => $value)
+                    {
+                        $valueString = $valueString.'"'.$value.'"'.",";
+                        $columnString = $columnString.$key.",";
+                    }
+                    $valueString = substr($valueString, 0, -1); // remove last comma
+                    $columnString = substr($columnString, 0, -1);
+                
+                    return "INSERT INTO $tableName ($columnString) VALUES ('$email', $valueString)";
+                }
+                
+                // returns true if email is in the key, and false if not 
+                function is_email($key)
+                {
+                    if(strval($key)=="email")
+                    {
+                        return true;
+                    }
+                    else 
+                    {
+                        return false;
+                    }
+                }
+                
+                $clientHost = "localhost";
+                $clientUsrName = "root";
+                $clientPassWord = "";
+                $clientDBname = "Answers";
+                
+                $tableName = "answers_Table";
+                $emailTableName = "authorized_Users";
+                
+                
+                $conn = mysqli_connect($clientHost, $clientUsrName, $clientPassWord,$clientDBname);
+                
+                $email = "NONE";
+                
+                $extractedQuestion = "";
+                $previousExtractedQuestion = "";
+                
+                $extractedKey = "";
+                
+                $sqlData = array();
+                
+                
+                
+                
+                
+                // loop through each post request and get names of questions, possibly email in a bit 
+                // this is to begin building an associative array of questions and emails, to create an SQL query
+                foreach ($_POST as $key => $value) 
+                {
+                    if(!is_email($key))
+                    {
+                        $extractedQuestion = get_question($key);
+                        
+                        // detect if we change question forms
+                        if($previousExtractedQuestion != $extractedQuestion)
+                        {
+                            $sqlData[strval($extractedQuestion)] = "";
+                            $previousExtractedQuestion = $extractedQuestion;
+                        }
+                    }
+                    else 
+                    {
+                        $email = $value;
+                    }
+                }
+                
+                
+                // exit if the user didn't input a valid email
+                $query = "SELECT * FROM $emailTableName WHERE email = '$email'";
+                
+                $result = mysqli_query($conn, $query);
+                
+                // if we don't have a valid email, nothing will return from query
+                if(mysqli_num_rows($result) ==0)
+                {
+                    exit("You do not have authorization to upload information");
+                }
+                
+                // now we simply match questions to their respective portion of the associative array, 
+                // and build it into a string that will later be inserted into sql
+                foreach ($_POST as $key => $value) 
+                {
+                    if(!is_email($key))
+                    {
+                        $extractedQuestion = get_question($key);
+                        $extractedKey = strval($value);
+                
+                        // put commas in for the SQL string
+                        $sqlData[$extractedQuestion] = $sqlData[$extractedQuestion].$extractedKey.",";
+                    }
+                }
+                
+                // now we remove the comma from the end of each associative array string, so we can simply drop
+                // the data into SQL  
+                foreach ($sqlData as $key => $value)
+                {
+                    if(!is_email($key))
+                    {
+                        $sqlData[$key] = substr($sqlData[$key], 0, -1);
+                    }
+                }
+                
+                
+                //print_assoc($sqlData);
+                $query = generate_query($sqlData, $email, $tableName);
+                
+                $result = mysqli_query($conn, $query);
+                
+                
+                
+                
+                ?>`;
+                download("index.php", phpContents);
+            } else {
+                
+            // need to get info from the user about the database that they are going to create
+            var clientHost = prompt("Enter the host name");
+            var clientUsrName = prompt("Enter the database username");
+            var clientpassWord = prompt("Enter the database password");
+            var clientDBname = prompt("Enter the database name");
+
+            // from here, use similar php but substitute the values that the user enters for database information
+            phpContents = `<?php
+            $b = "<br>"; // so I don't have to keep typing it out 
+            // note, could use hidden fields to get the question information if needed
+            
+            // prints out an associative array
+            function print_assoc($array)
+            {
+               foreach ($array as $key => $value) 
+               {
+                   echo "Key: $key; Value: $value"."<br>";
+               }
+            }
+            
+            // pass this $key from a post request coming from script.js. Will be formatted as questionXXX-
+            // will return the question plus all digits associated with it
+            function get_question($key)
+            {
+                $firstIndex = 0;
+                $lastIndex = 0;
+            
+                $extractedQuestion = "question";
+                $questionNumber = "";
+            
+                // get the question number
+                $firstIndex = strpos(strval($key),strval("question")) + 8;
+                $lastIndex = strpos(strval($key),strval("-"));
+                
+                for($i = $firstIndex; $i < $lastIndex; $i++)
+                {
+                    $extractedQuestion = $extractedQuestion . htmlspecialchars($key)[$i];
+                }
+            
+                return $extractedQuestion;
+            }
+            
+            function generate_query($array, $email, $tableName)
+            {
+                $valueString = ""; // string of values we put into SQL 
+                $columnString = "email,"; // string of cols we put into SQL
+                foreach($array as $key => $value)
+                {
+                    $valueString = $valueString.'"'.$value.'"'.",";
+                    $columnString = $columnString.$key.",";
+                }
+                $valueString = substr($valueString, 0, -1); // remove last comma
+                $columnString = substr($columnString, 0, -1);
+            
+                return "INSERT INTO $tableName ($columnString) VALUES ('$email', $valueString)";
+            }
+            
+            // returns true if email is in the key, and false if not 
+            function is_email($key)
+            {
+                if(strval($key)=="email")
+                {
+                    return true;
+                }
+                else 
+                {
+                    return false;
+                }
+            }
+            
+            // not using these because client defines
+            // $clientHost = "localhost";
+            // $clientUsrName = "root";
+            // $clientPassWord = "";
+            // $clientDBname = "Answers";
+            
+            $tableName = "answers_Table";
+            $emailTableName = "authorized_Users";
+            
+            
+            $conn = mysqli_connect($${clientHost}, $${clientUsrName}, $${clientPassWord}, $${clientDBname});
+            
+            $email = "NONE";
+            
+            $extractedQuestion = "";
+            $previousExtractedQuestion = "";
+            
+            $extractedKey = "";
+            
+            $sqlData = array();
+            
+            
+            
+            
+            
+            // loop through each post request and get names of questions, possibly email in a bit 
+            // this is to begin building an associative array of questions and emails, to create an SQL query
+            foreach ($_POST as $key => $value) 
+            {
+                if(!is_email($key))
+                {
+                    $extractedQuestion = get_question($key);
+                    
+                    // detect if we change question forms
+                    if($previousExtractedQuestion != $extractedQuestion)
+                    {
+                        $sqlData[strval($extractedQuestion)] = "";
+                        $previousExtractedQuestion = $extractedQuestion;
+                    }
+                }
+                else 
+                {
+                    $email = $value;
+                }
+            }
+            
+            
+            // exit if the user didn't input a valid email
+            $query = "SELECT * FROM $emailTableName WHERE email = '$email'";
+            
+            $result = mysqli_query($conn, $query);
+            
+            // if we don't have a valid email, nothing will return from query
+            if(mysqli_num_rows($result) ==0)
+            {
+                exit("You do not have authorization to upload information");
+            }
+            
+            // now we simply match questions to their respective portion of the associative array, 
+            // and build it into a string that will later be inserted into sql
+            foreach ($_POST as $key => $value) 
+            {
+                if(!is_email($key))
+                {
+                    $extractedQuestion = get_question($key);
+                    $extractedKey = strval($value);
+            
+                    // put commas in for the SQL string
+                    $sqlData[$extractedQuestion] = $sqlData[$extractedQuestion].$extractedKey.",";
+                }
+            }
+            
+            // now we remove the comma from the end of each associative array string, so we can simply drop
+            // the data into SQL  
+            foreach ($sqlData as $key => $value)
+            {
+                if(!is_email($key))
+                {
+                    $sqlData[$key] = substr($sqlData[$key], 0, -1);
+                }
+            }
+            
+            
+            //print_assoc($sqlData);
+            $query = generate_query($sqlData, $email, $tableName);
+            
+            $result = mysqli_query($conn, $query);
+            
+            
+            
+            
+            ?>`;
+            download("index.php", phpContents);
+            }
+
 }
 
 /*
  * Create a table of users that the admin can upload with a CSV file to define a table of 'authorizedUsers'
 */
+
 var csvParsedArray = "";
-$(document).on('click', '#btnUploadFile', function () { // Runs on click of upload button
-    if ($("#fileToUpload").get(0).files.length == 0) { // no file uploaded
-        alert("Please upload the file first.");
-        return;
-    }
-    let fileUpload = $("#fileToUpload").get(0);
-    let files = fileUpload.files;
-    if (files[0].name.toLowerCase().lastIndexOf(".csv") == -1) { // incorrect file type
-        alert("Please upload only CSV files");
-        return;
-    }
-    let reader = new FileReader();
-    let bytes = 50000;
-    reader.onloadend = function (evt) { // find necessary values in file
-        let lines = evt.target.result;
-        if (lines && lines.length > 0) {
-            let line_array = CSVToArray(lines);
-            if (lines.length == bytes) {
-                line_array = line_array.splice(0, line_array.length - 1);
-            }
-            var columnArray = [];
-            for (let i = 0; i < line_array.length; i++) {
-                let cellArr = line_array[i];
-                for (var j = 0; j < cellArr.length; j++) {
-                    if (i == 0) {
-                        columnArray.push(cellArr[j].replace('﻿', ''));
-                    }
-                    else {
-                        csvParsedArray += cellArr[j] + " ";
+$(document).on('click', '#btnUploadFile', () => {
+        if ($("#fileToUpload").get(0).files.length == 0) { // no file uploaded
+            alert("Please upload the file first.");
+            return;
+        }
+        let fileUpload = $("#fileToUpload").get(0);
+        let files = fileUpload.files;
+        if (files[0].name.toLowerCase().lastIndexOf(".csv") == -1) { // incorrect file type
+            alert("Please upload only CSV files");
+            return;
+        }
+        let reader = new FileReader();
+        let bytes = 50000;
+        reader.onloadend = function (evt) {
+            let lines = evt.target.result;
+            if (lines && lines.length > 0) {
+                let line_array = CSVToArray(lines);
+                if (lines.length == bytes) {
+                    line_array = line_array.splice(0, line_array.length - 1);
+                }
+                var columnArray = [];
+                for (let i = 0; i < line_array.length; i++) {
+                    let cellArr = line_array[i];
+                    for (var j = 0; j < cellArr.length; j++) {
+                        if (i == 0) {
+                            columnArray.push(cellArr[j].replace('﻿', ''));
+                        }
+                        else {
+                            csvParsedArray += cellArr[j] + " ";
+                        }
                     }
                 }
             }
-        }
 
-        // Create sql file
-        var sqlFileName = "authorizedUsers.sql";
-        var sqlContents = "CREATE DATABASE IF NOT EXISTS Answers; USE Answers; DROP TABLE IF EXISTS authorized_Users; CREATE TABLE authorized_Users(username VARCHAR(100), email VARCHAR(100) PRIMARY KEY); INSERT INTO authorized_Users VALUES ";
-        
-        var formString = "";
-        var username = "";
-        var email = "";
-        var i = 0;
-        while (csvParsedArray.indexOf(' ') != -1) { // continues until all values have been added to query
-            // username
-            let x = csvParsedArray.indexOf(' '); 
-            username = csvParsedArray.substr(0, x);
-            csvParsedArray = csvParsedArray.substr(x + 1);
+            // Create sql file
+            var sqlFileName = "authorizedUsers.sql";
 
-            // email
-            x = csvParsedArray.indexOf(' ');
-            email = csvParsedArray.substr(0, x);
-            csvParsedArray = csvParsedArray.substr(x + 1);
+            if (useLocalHost == true) {
+                var sqlContents = "CREATE DATABASE IF NOT EXISTS Answers; USE Answers; DROP TABLE IF EXISTS authorized_Users; CREATE TABLE authorized_Users(username VARCHAR(100), email VARCHAR(100) PRIMARY KEY); INSERT INTO authorized_Users VALUES ";
+            } else {
+                var sqlContents = "DROP TABLE IF EXISTS authorized_Users; CREATE TABLE authorized_Users(username VARCHAR(100), email VARCHAR(100) PRIMARY KEY); INSERT INTO authorized_Users VALUES ";
+            }
 
-            // end row
-            formString += "('" + username + "', '" + email + "'), ";
-        }
-        sqlContents += formString;
-        sqlContents = sqlContents.slice(0, -2);
-        sqlContents += ";"
+            var formString = "";
+            var username = "";
+            var email = "";
+            var i = 0;
+            while (csvParsedArray.indexOf(' ') != -1) { // continues until all values have been added to query
+                // username
+                let x = csvParsedArray.indexOf(' ');
+                username = csvParsedArray.substr(0, x);
+                csvParsedArray = csvParsedArray.substr(x + 1);
 
-        alert(sqlContents); // show user file contents
+                // email
+                x = csvParsedArray.indexOf(' ');
+                email = csvParsedArray.substr(0, x);
+                csvParsedArray = csvParsedArray.substr(x + 1);
 
-        download(sqlFileName, sqlContents);  // build and download the sql file
-    }
-    let blob = files[0].slice(0, bytes);
-    reader.readAsBinaryString(blob);
-});
+                // end row
+                formString += "('" + username + "', '" + email + "'), ";
+            }
+            sqlContents += formString;
+            sqlContents = sqlContents.slice(0, -2);
+            sqlContents += ";";
+
+            alert(sqlContents); // show user file contents
+
+            download(sqlFileName, sqlContents); // build and download the sql file
+        };
+        let blob = files[0].slice(0, bytes);
+        reader.readAsBinaryString(blob);
+    });
 
 function CSVToArray(strData, strDelimiter) { // performs conversion from csv file to readable data
     strDelimiter = (strDelimiter || ",");
@@ -1068,26 +1441,3 @@ function CSVToArray(strData, strDelimiter) { // performs conversion from csv fil
     }
     return (arrData);
 }
-
-    /****************************************************************************************************************************************************************************************************************/
-    /* Build the PHP File for the form
-    /****************************************************************************************************************************************************************************************************************/
-    /*
-        - get the database info from the user so that a connection can be made to the client's DB of choice
-        - Function to handle when a form is submitted by a user
-            ~ Collect the info from the form <- this is the main thing
-            ~ Use that info to build an sql query to add the info to answersTable
-            ~ Execute the sql query
-    */
-            var phpFileName = "formMaker.php";      // name of the php file
-            var phpFileContents = "";               // string will contain the entire text for the php document 
-        
-            // get info about the port, username, password, and dbname from the user
-            let clientHost = "";
-            let clientUsrName = "";
-            let clientpassWord = "";
-            let clientDBname = "";
-        
-            // connect to that db 
-        
-            // download(phpFileName, phpContents);  // build and download the php file

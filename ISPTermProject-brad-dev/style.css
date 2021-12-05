@@ -176,7 +176,7 @@ table, th, td {
   
   /* The Close Button */
   .close {
-    color: white;
+    color: black;
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -213,5 +213,12 @@ table, th, td {
     background: orange; 
     padding: 0px;
     text-align:center;
+    cursor: pointer;
+  }
+
+#questionImg {
+    position: fixed;
+    top: 1em;
+    right: 1em;
     cursor: pointer;
   }
