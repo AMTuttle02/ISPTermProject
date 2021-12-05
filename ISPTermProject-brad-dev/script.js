@@ -1367,9 +1367,20 @@ $(document).on('click', '#btnUploadFile', function () { // Runs on click of uplo
             }
         }
 
+        // ask the user if they want to use local host
+        var useLocal = confirm("Would you like to use local host for this applicaiton? Click cancel if you would like to use your own database");
+
         // Create sql file
         var sqlFileName = "authorizedUsers.sql";
-        var sqlContents = "CREATE DATABASE IF NOT EXISTS Answers; USE Answers; DROP TABLE IF EXISTS authorized_Users; CREATE TABLE authorized_Users(username VARCHAR(100), email VARCHAR(100) PRIMARY KEY); INSERT INTO authorized_Users VALUES ";
+        var sqlContents = "";
+
+        if(useLocal)
+        {
+            sqlContents = "CREATE DATABASE IF NOT EXISTS Answers; USE Answers; DROP TABLE IF EXISTS authorized_Users; CREATE TABLE authorized_Users(username VARCHAR(100), email VARCHAR(100) PRIMARY KEY); INSERT INTO authorized_Users VALUES ";
+        } else {
+            sqlContents = "DROP TABLE IF EXISTS authorized_Users; CREATE TABLE authorized_Users(username VARCHAR(100), email VARCHAR(100) PRIMARY KEY); INSERT INTO authorized_Users VALUES ";
+
+        }
         
         var formString = "";
         var username = "";
