@@ -130,7 +130,7 @@ function editTab(currIndex) {
     var elmType = "";
 
     // current list item from button click
-    alert(XelementArr[currIndex]);
+    //alert(XelementArr[currIndex]);
 
     // find that element in the elementArr
     for (var i = 0; i < elementArr.length; i++) {
@@ -252,7 +252,7 @@ function editTab(currIndex) {
 
                 markupCopy = `${thisHeader}`;
                 markupCopy += `<br>`;
-                alert(thisHeader);
+                //alert(thisHeader);
                 for(let i = 0; i < inputLines.length; i++)
                 {
                     markupCopy += inputLines[i];
@@ -618,7 +618,7 @@ check.addEventListener('click', genPage);
 // create the element
 function getElement() {
     var id = $('input[name=header]:checked').attr('id');
-    alert(id);
+    //alert(id);
 }
 
 // function called from the button click in the element box
@@ -644,7 +644,7 @@ function addHTMLelm(type) {
     } else if (type == 'image') {
         let linky = prompt("Enter the image source");
         let desc = prompt("Enter a description of the image");
-        let markup = `<br><img src="${linky}" alt="${desc}" width="500"><br>`;
+        let markup = `<br><img src="${linky}" alt="${desc}" width="200"><br>`;
         addTab(markup);
     } else if (type == 'YTvid') {
         let linky = prompt("Video URL");
@@ -802,9 +802,6 @@ function addTab(info) {
     // call the create list function
     createList();
 }
-
-
-// dont touch ^
 
 
 /*
@@ -986,20 +983,17 @@ function builderFunction()
     sqlContents = sqlContents.slice(0, -1);
     sqlContents += ");"
     
-    alert(sqlContents); // alert user of file contents
+    //alert(sqlContents); // alert user of file contents
     download(sqlFileName, sqlContents);  // build and download the sql file
 
     /****************************************************************************************************************************************************************************************************************/
     /* Build the PHP File for the form
     /****************************************************************************************************************************************************************************************************************/
     /*
-        - get the database info from the user so that a connection can be made to the client's DB of choice
-        - Function to handle when a form is submitted by a user
-            ~ Collect the info from the form <- this is the main thing
-            ~ Use that info to build an sql query to add the info to answersTable
-            ~ Execute the sql query
+        - Building a php file that will submit information supplied by users to database
+        - Change slightly if user is not using localhost for their application by asking for info about their database
     */
-            var phpFileName = "index.php";             // name of the php file
+            var phpFileName = "index.php";          // name of the php file
             var phpFileContents = "";               // string will contain the entire text for the php document 
 
             if(useLocalHost == true)
@@ -1368,12 +1362,13 @@ $(document).on('click', '#btnUploadFile', function () { // Runs on click of uplo
         }
 
         // ask the user if they want to use local host
-        var useLocal = confirm("Would you like to use local host for this applicaiton? Click cancel if you would like to use your own database");
+        var useLocal = confirm("Would you like to use local host for this application? Click cancel if you would like to use your own database");
 
         // Create sql file
         var sqlFileName = "authorizedUsers.sql";
         var sqlContents = "";
 
+        // different if using local host
         if(useLocal)
         {
             sqlContents = "CREATE DATABASE IF NOT EXISTS Answers; USE Answers; DROP TABLE IF EXISTS authorized_Users; CREATE TABLE authorized_Users(username VARCHAR(100), email VARCHAR(100) PRIMARY KEY); INSERT INTO authorized_Users VALUES ";
@@ -1404,7 +1399,7 @@ $(document).on('click', '#btnUploadFile', function () { // Runs on click of uplo
         sqlContents = sqlContents.slice(0, -2);
         sqlContents += ";"
 
-        alert(sqlContents); // show user file contents
+        //alert(sqlContents); // show user file contents
 
         download(sqlFileName, sqlContents);  // build and download the sql file
     }
@@ -1439,26 +1434,3 @@ function CSVToArray(strData, strDelimiter) { // performs conversion from csv fil
     }
     return (arrData);
 }
-
-    /****************************************************************************************************************************************************************************************************************/
-    /* Build the PHP File for the form
-    /****************************************************************************************************************************************************************************************************************/
-    /*
-        - get the database info from the user so that a connection can be made to the client's DB of choice
-        - Function to handle when a form is submitted by a user
-            ~ Collect the info from the form <- this is the main thing
-            ~ Use that info to build an sql query to add the info to answersTable
-            ~ Execute the sql query
-    */
-            var phpFileName = "formMaker.php";      // name of the php file
-            var phpFileContents = "";               // string will contain the entire text for the php document 
-        
-            // get info about the port, username, password, and dbname from the user
-            let clientHost = "";
-            let clientUsrName = "";
-            let clientpassWord = "";
-            let clientDBname = "";
-        
-            // connect to that db 
-        
-            // download(phpFileName, phpContents);  // build and download the php file
