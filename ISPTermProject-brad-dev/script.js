@@ -422,15 +422,15 @@ function editTab(currIndex) {
     }
 
     // array of box style elements
-    var boxElems = [`id="TextBox"`, `type="date"`, `type="number"`];
+    var boxElems = [`type="text"`, `type="date"`, `type="number"`];
     for(var i = 0; i < boxElems.length; i++)
     {
         if(markup.includes(boxElems[i]))
         {
-            // read in the markup to get the text - the key is <p>
+            // read in the markup to get the text
             // store substring of everything after the text 
-            var first = markup.indexOf("<p>") + 3;
-            var second = markup.indexOf("</p>")
+            var first = markup.indexOf(">", 6) + 1;
+            var second = markup.indexOf("</label>");
             var currTit = markup.substring(first, second);
 
             // prompt with the existing text
